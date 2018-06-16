@@ -1,0 +1,122 @@
+import csv
+import os
+
+individual_records = []
+input_file_name = "kaspersky_export.txt"
+input_file_path = os.getcwd() + "/" + input_file_name
+output_file_name = "bitwarden_import.csv"
+output_file_path = os.getcwd() + "/" + output_file_name
+
+print("Input File: "+input_file_path)
+print("Output File: "+output_file_path)
+
+def main():
+    read_input_file()
+    write_output_file()
+
+def read_input_file():
+    file = open(input_file_path)
+    handlers = {
+        "Website name:",
+        "Website URL:",
+        "Login name:",
+        "Login:",
+        "Password:",
+        "Comment",
+        "---"
+    }
+    website_name = None
+    website_url = None
+    login = None
+    password = None;
+    comment = None
+
+    for line in file:
+        if any(s in line for s in handlers):
+            key = (line.partition(':')[0]).lstrip().rstrip().strip("\n")
+            value = (line.partition(':')[2]).lstrip().rstrip().strip("\n")
+            if key == "Website name":
+                website_name = value
+            elif key == "Website URL":
+                website_url = value
+            elif key == "Login":
+                login = value
+            elif key == "Password":
+                password = value
+            elif key == "Comment":
+                comment = value
+            elif key == "---":
+                temp = IndividualRecord(website_name, comment, website_url, login, password)
+                individual_records.append(temp)
+                website_name = None
+                website_url = None
+                password = None
+                login = None
+                comment = None
+
+def write_output_file():
+
+    with open(output_file_path, 'w', newline='') as output_file:
+        columns = ["folder", "favorite", "type", "name", "notes", "fields", "login_uri", "login_username",
+                   "login_password", "login_totp"]
+        csv_writer = csv.writer(output_file, delimiter=",")
+
+        csv_writer.writerow(columns)
+
+        for i in range(len(individual_records)):
+            csv_writer.writerow([individual_records[i].display_folder(),
+                                 individual_records[i].display_favorite(),
+                                 individual_records[i].display_type(),
+                                 individual_records[i].display_name(),
+                                 individual_records[i].display_notes(),
+                                 individual_records[i].display_fields(),
+                                 individual_records[i].display_login_uri(),
+                                 individual_records[i].display_login_username(),
+                                 individual_records[i].display_login_password(),
+                                 individual_records[i].display_login_totp()])
+
+
+class IndividualRecord:
+    def __init__(self, name, notes, login_uri, login_username, login_password):
+        self.folder = ""
+        self.favorite = ""
+        self.type = ""
+        self.name = name
+        self.notes = notes
+        self.fields = ""
+        self.login_uri = login_uri
+        self.login_username = login_username
+        self.login_password = login_password
+        self.login_totp = ""
+
+    def display_folder(self):
+        return self.folder
+
+    def display_favorite(self):
+        return self.favorite
+
+    def display_type(self):
+        return self.type
+
+    def display_name(self):
+        return self.name
+
+    def display_notes(self):
+        return self.notes
+
+    def display_fields(self):
+        return self.fields
+
+    def display_login_uri(self):
+        return self.login_uri
+
+    def display_login_username(self):
+        return self.login_username
+
+    def display_login_password(self):
+        return self.login_password
+
+    def display_login_totp(self):
+        return self.login_totp
+
+main()
